@@ -3,6 +3,7 @@ package com.prueba.heros.service.impl;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class HeroServiceImpl implements HeroService {
 	private HeroRepository heroRepository;
 	
 	@Override
+	@Cacheable("repoCache")
 	public List<Hero> getHeros() {	
 		return heroRepository.findAll();
 	}

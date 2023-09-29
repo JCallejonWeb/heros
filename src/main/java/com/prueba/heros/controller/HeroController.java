@@ -1,6 +1,5 @@
 package com.prueba.heros.controller;
 
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.prueba.heros.annotation.RequestExecutionTime;
 import com.prueba.heros.config.HerosException;
 import com.prueba.heros.entity.Hero;
 import com.prueba.heros.model.DeleteOutput;
@@ -50,20 +50,22 @@ public class HeroController {
     		@ApiResponse(responseCode = "400", description = "Bad Request",
             content = { @Content}),
     })
+	//Anotación para controlar el timepo que tarda en ejecutarse un endpoint
+	@RequestExecutionTime
     @ModelAttribute
     @GetMapping(value = "/get-all", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<HerosOutput> getHeros(){
-		
+		log.info("Llamada al endpoint getHeros");
 		List<Hero> heros = heroService.getHeros();
-		
 		HerosOutput output = new HerosOutput(HEROS, heros);
 		
-		if (heros.isEmpty()) {
+		if (heros.isEmpty()) { 
+			log.info("204: No content.");
 			 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
+			log.info("200: "+heros);
 			return new ResponseEntity<>(output, HttpStatus.OK);
 		}
-		
 		
 	}
 	
@@ -77,14 +79,18 @@ public class HeroController {
     		@ApiResponse(responseCode = "400", description = "Bad Request",
             content = { @Content}),
     })
+	@RequestExecutionTime
     @ModelAttribute
     @GetMapping(value = "/hero/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Hero> getHero(@PathVariable String id){
+		log.info("Llamada al endpoint getHero");
 		    Optional<Hero> hero = heroService.getHeroById(id);
 		    if (!hero.isPresent()) {
-				 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		    	log.info("204: No content");
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else {
-				 return new ResponseEntity<>(hero.get(), HttpStatus.OK);
+				log.info("200: "+hero.get());
+				return new ResponseEntity<>(hero.get(), HttpStatus.OK);
 			}
 	}
 	
@@ -98,14 +104,18 @@ public class HeroController {
     		@ApiResponse(responseCode = "400", description = "Bad Request",
             content = { @Content}),
     })
+	@RequestExecutionTime
     @ModelAttribute
     @GetMapping(value = "/hero-like/{cadena}", produces = { MediaType.APPLICATION_JSON_VALUE })	
 	public ResponseEntity<HerosOutput> getHerosByString(@PathVariable String cadena){
+		log.info("Llamada al endpoint getHerosByString");
 		List<Hero> heros = heroService.getHeroContaining(cadena);
 		HerosOutput output = new HerosOutput(HEROS, heros);
 		if (heros.isEmpty()) {
+			log.info("204: No content");
 			 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
+			log.info("200: "+heros);
 			return new ResponseEntity<>(output, HttpStatus.OK);
 		}
 	}
@@ -120,15 +130,18 @@ public class HeroController {
     		@ApiResponse(responseCode = "400", description = "Bad Request",
             content = { @Content}),
     })
+	@RequestExecutionTime
     @ModelAttribute
     @PostMapping(value = "/update", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Hero> updateHero(@RequestBody Hero hero){
-		
-		 Optional<Hero> heroid = heroService.getHeroById(String.valueOf(hero.getId()));
+		log.info("Llamada al endpoint updateHero");
+		Optional<Hero> heroid = heroService.getHeroById(String.valueOf(hero.getId()));
 		
 		 if (heroid.isEmpty()) {
+			 log.info("400: No existe el registro para ese ID.");
 			 throw new HerosException(HttpStatus.BAD_REQUEST,"No existe el registro para ese ID.");
 		} else {
+			log.info("200: "+hero);
 			return new ResponseEntity<>(heroService.updateHero(hero), HttpStatus.OK);
 		}
 
@@ -144,12 +157,16 @@ public class HeroController {
     		@ApiResponse(responseCode = "400", description = "Bad Request",
             content = { @Content}),
     })
+	@RequestExecutionTime
     @ModelAttribute
     @PostMapping(value = "/delete/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<DeleteOutput> deleteHeros(@PathVariable String id){			
-		 if (!heroService.deleteHero(id)) {
-			 throw new HerosException(HttpStatus.BAD_REQUEST,"No se ha podido eliminar el registro, prueba con otro ID");
-		} else {		
+		log.info("Llamada al endpoint deleteHeros");
+		if (!heroService.deleteHero(id)) {
+			log.info("400: No se ha podido eliminar el registro, prueba con otro ID");
+			throw new HerosException(HttpStatus.BAD_REQUEST,"No se ha podido eliminar el registro, prueba con otro ID");
+		} else {
+			log.info("200: Registro con ID "+id+" eliminado correctamente");
 			return new ResponseEntity<>(new DeleteOutput("Registro con ID "+id+" eliminado correctamente"), HttpStatus.OK);
 		}
 	}

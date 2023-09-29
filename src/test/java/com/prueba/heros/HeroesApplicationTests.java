@@ -1,10 +1,10 @@
-package com.juan.heroes;
+package com.prueba.heros;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class HeroesApplicationTests {
+class HerosApplicationTests {
 
 	@Test
 	void contextLoads() {
